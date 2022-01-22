@@ -34,3 +34,7 @@ jobs:
     - run: npm run build
       env:
         REACT_APP_API_ENDPOINT_URL: ${{secrets.REACT_APP_API_ENDPOINT_URL}}
+    - uses: actions/upload-artifact@v2
+      with:
+        name: build
+        path: frontend/build
