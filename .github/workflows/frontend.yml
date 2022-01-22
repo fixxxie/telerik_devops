@@ -45,7 +45,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - uses: actions/download-artifact@v2
-        with:
-          name: build
-          path: infrastructure/frontend
+      with:
+        name: build
+        path: infrastructure/frontend
     - run: ls -la infrastructure/frontend
