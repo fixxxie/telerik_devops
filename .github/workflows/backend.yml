@@ -53,6 +53,12 @@ jobs:
       with:
         name: build
         path: infrastructure/backend/build
+    - name: Unzip artifact
+      working-directory: infrastructure/backend/build
+      run: unzip build.zip
+    - name: Delete zip
+      working-directory: infrastructure/backend/build
+      run: unlink build.zip
     - name: Login to DockerHub
       uses: docker/login-action@v1 
       with:
