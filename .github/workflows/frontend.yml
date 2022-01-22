@@ -48,4 +48,9 @@ jobs:
       with:
         name: build
         path: infrastructure/frontend/build
-    - run: ls -la infrastructure/frontend
+    - name: Build and publish docker image
+      uses: docker/build-push-action@v2
+      with:
+        context: infrastructure/frontend
+        push: true
+        tags: chavdarb/devops-sample-frontend:latest
