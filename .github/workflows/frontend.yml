@@ -43,7 +43,7 @@ jobs:
     needs: build
     environment: production
     env:
-      SHA8: '${GITHUB_SHA:8}'
+      SHA8: ${GITHUB_SHA:8}
     steps:
     - uses: actions/checkout@v2
     - uses: actions/download-artifact@v2
