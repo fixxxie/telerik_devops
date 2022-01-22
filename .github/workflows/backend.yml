@@ -37,3 +37,7 @@ jobs:
         restore-keys: ${{ runner.os }}-composer-
     - name: Install dependencies
       run: composer install --prefer-dist
+    - uses: actions/upload-artifact@v2
+      with:
+        name: build
+        path: backend
