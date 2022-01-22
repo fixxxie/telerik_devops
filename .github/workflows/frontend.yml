@@ -47,5 +47,5 @@ jobs:
     - uses: actions/download-artifact@v2
       with:
         name: build
-        path: infrastructure/frontend
+        path: infrastructure/frontend/build
     - run: ls -la infrastructure/frontend
