@@ -37,7 +37,9 @@ jobs:
         restore-keys: ${{ runner.os }}-composer-
     - name: Install dependencies
       run: composer install --prefer-dist
+    - name: Archiving build
+      run: zip -r build.zip .
     - uses: actions/upload-artifact@v2
       with:
         name: build
-        path: backend
+        path: backend/build.zip
