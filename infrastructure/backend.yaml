@@ -28,13 +28,22 @@ spec:
         - name: DB_DATABASE
           value: devops-db
         - name: DB_USERNAME
-          value: devops-user
+          valueFrom:
+              secretKeyRef:
+                name: app-secrets
+                key: mysql-username
         - name: DB_PASSWORD
-          value: devops-password
+          valueFrom:
+              secretKeyRef:
+                name: app-secrets
+                key: mysql-password
         - name: APP_ENV
           value: production
         - name: APP_KEY
-          value: wahvuu1posh4ovierohnguich8Soofee
+          valueFrom:
+              secretKeyRef:
+                name: app-secrets
+                key: app-key
         - name: APP_URL
           value: http://api.chavdarbonev.com
         - name: FRONTEND_URL

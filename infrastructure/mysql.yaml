@@ -21,11 +21,20 @@ spec:
         - name: MYSQL_DATABASE
           value: devops-db
         - name: MYSQL_USER
-          value: devops-user
+          valueFrom:
+              secretKeyRef:
+                name: app-secrets
+                key: mysql-username
         - name: MYSQL_PASSWORD
-          value: devops-password
+          valueFrom:
+              secretKeyRef:
+                name: app-secrets
+                key: mysql-password
         - name: MYSQL_ROOT_PASSWORD
-          value: root
+          valueFrom:
+              secretKeyRef:
+                name: app-secrets
+                key: mysql-root-password
         ports:
         - containerPort: 3306
 ---
