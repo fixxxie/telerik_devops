@@ -101,7 +101,7 @@ jobs:
 
     - name: Unzip artifact
       working-directory: infrastructure/backend/build
-      run: unzip build.zip
+      run: unzip -q build.zip
     - name: Delete zip
       working-directory: infrastructure/backend/build
       run: unlink build.zip
@@ -144,7 +144,7 @@ jobs:
       with:
         version: v1.23.2
 
-    - name: Connect to K8s cluster
+    - name: Configure connection to K8s cluster
       uses: azure/k8s-set-context@v1
       with:
         method: kubeconfig
