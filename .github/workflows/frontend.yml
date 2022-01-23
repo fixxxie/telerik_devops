@@ -37,7 +37,7 @@ jobs:
     - name: Running test
       run: npm test
     - name: Rinning lint
-      run: npm lint
+      run: npm run lint
     - uses: actions/upload-artifact@v2
       with:
         name: build
