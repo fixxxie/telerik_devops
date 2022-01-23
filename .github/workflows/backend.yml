@@ -57,6 +57,10 @@ jobs:
         restore-keys: ${{ runner.os }}-composer-
     - name: Install dependencies
       run: composer install --prefer-dist
+    - name: Running lint
+      run: php artisan lint
+    - name: Running static code analyse
+      run: php artisan analyse:code
     - name: Running backend tests
       run: php artisan test
     - name: Archiving build
