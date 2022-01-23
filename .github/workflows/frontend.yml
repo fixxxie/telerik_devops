@@ -34,6 +34,9 @@ jobs:
     - run: npm run build
       env:
         REACT_APP_API_ENDPOINT_URL: ${{secrets.REACT_APP_API_ENDPOINT_URL}}
+    - name: Running test
+      run: npm test
+      run: npm lint
     - uses: actions/upload-artifact@v2
       with:
         name: build
