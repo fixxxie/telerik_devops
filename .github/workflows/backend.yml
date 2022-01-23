@@ -20,6 +20,17 @@ jobs:
     defaults:
       run:
         working-directory: backend
+    services:
+      mysql:
+        image: mysql:8.0.27
+        env:
+          MYSQL_ALLOW_EMPTY_PASSWORD: yes
+          MYSQL_DATABASE: test
+          MYSQL_USER: test-user
+          MYSQL_PASSWORD: test-password
+        ports:
+          - 3306:3306
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
     steps:
     - uses: actions/checkout@v2
     - uses: shivammathur/setup-php@v2
@@ -37,6 +48,15 @@ jobs:
         restore-keys: ${{ runner.os }}-composer-
     - name: Install dependencies
       run: composer install --prefer-dist
+    - name: Running backend tests
+      env: 
+        DB_CONNECTION: mysql
+        DB_HOST: mysql
+        DB_DATABASE: test
+        DB_USERNAME: test-user
+        DB_PASSWORD: test-password
+        APP_ENV: testing
+      run: php artisan test
     - name: Archiving build
       run: zip -r -q build.zip ./*
     - uses: actions/upload-artifact@v2
