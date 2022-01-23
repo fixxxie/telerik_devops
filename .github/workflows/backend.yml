@@ -99,6 +99,9 @@ jobs:
         context: infrastructure/backend
         push: true
         tags: chavdarb/devops-sample-backend:${{steps.get-sha.outputs.short-sha}},chavdarb/devops-sample-backend:latest
+    - uses: azure/container-scan@v0
+      with:
+        image-name: chavdarb/devops-sample-backend:${{steps.get-sha.outputs.short-sha}}
   deploy:
     runs-on: ubuntu-latest
     needs: image
