@@ -33,7 +33,7 @@ jobs:
         options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
     env: 
         DB_CONNECTION: mysql
-        DB_HOST: mysql
+        DB_HOST: 127.0.0.1
         DB_DATABASE: dev_ops_proof_of_concept_test
         DB_USERNAME: test-user
         DB_PASSWORD: test-password
