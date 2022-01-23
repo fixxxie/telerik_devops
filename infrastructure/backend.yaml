@@ -17,6 +17,7 @@ spec:
       containers:
       - name: backend
         image: chavdarb/devops-sample-backend:latest
+        imagePullPolicy: Always
         env: 
         - name: DB_CONNECTION
           value: mysql
