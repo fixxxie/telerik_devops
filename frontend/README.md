@@ -43,10 +43,10 @@ Additionally:
 
 Runs the tests for the project.
 
-### `npm lint`
+### `npm run lint`
 
 Lints the projects' code base.
 
-### `npm format`
+### `npm run format`
 
 Checks the format of the projects' code base.
