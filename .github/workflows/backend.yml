@@ -48,12 +48,11 @@ jobs:
         restore-keys: ${{ runner.os }}-composer-
     - name: Install dependencies
       run: composer install --prefer-dist
-    - run: ping -c 2 mysql
-    - run: mysql -utest-user -ptest-password -hmysql -e "SHOW DATABASES"
+    - run: mysql -utest-user -ptest-password -h127.0.0.1 -e "SHOW DATABASES"
     - name: Running backend tests
       env: 
         DB_CONNECTION: mysql
-        DB_HOST: mysql
+        DB_HOST: 127.0.0.1
         DB_DATABASE: dev_ops_proof_of_concept_test
         DB_USERNAME: test-user
         DB_PASSWORD: test-password
