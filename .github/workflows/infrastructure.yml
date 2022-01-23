@@ -1,39 +1,49 @@
-# This is a basic workflow that is manually triggered
+# This workflow manages the K8s infrastructure
 
 name: Deploy infrastructure
 
-# Controls when the action will run. Workflow runs when manually triggered using the UI
-# or API.
+# Workflow is triggered on infrastructure commit/push
 on:
   push:
     branches: [ main ]
     paths:
       - 'infrastructure/**'
       - '**/workflows/infrastructure.yml'
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+
 jobs:
-  # This workflow contains a single job called "greet"
+  # This job deploys K8s infrastructure
   deploy:
+    name: Deploy infrastructure
     runs-on: ubuntu-latest
     environment: production
+
     steps:
-    - uses: actions/checkout@v2
-    - uses: azure/setup-kubectl@v2.0
+    - name: Checkout git repo
+      uses: actions/checkout@v2
+
+    - name: Setup kubectl
+      uses: azure/setup-kubectl@v2.0
       with:
         version: v1.23.2
-    - uses: azure/k8s-set-context@v1
+
+    - name: Configure connection to K8s cluster
+      uses: azure/k8s-set-context@v1
       with:
         method: kubeconfig
         kubeconfig: ${{ secrets.KUBE_CONFIG }}
+
     - name: Set cluster secrets
       uses: azure/k8s-create-secret@v2
       with:
         secret-type: 'generic'
         secret-name: 'app-secrets'
         data: ${{ secrets.APP_SECRETS}}
-    - uses: Azure/k8s-deploy@v1.4
+
+    - name: Deploy infrastructure
+      uses: Azure/k8s-deploy@v1.4
       with:
         manifests: |
+            infrastructure/storage.yaml
             infrastructure/mysql.yaml
             infrastructure/backend.yaml
             infrastructure/frontend.yaml

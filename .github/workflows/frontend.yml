@@ -1,90 +1,122 @@
-# This is a basic workflow that is manually triggered
+# This workflow builds, tests, lints and deploys the frontend
+name: Build & deploy Frontend
 
-name: Build & deploy frontend
-
-# Controls when the action will run. Workflow runs when manually triggered using the UI
-# or API.
+# Workflow is triggered on frontend commit/push
 on:
   push:
     branches: [ main ]
     paths:
       - 'frontend/**'
       - '**/workflows/frontend.yml'
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+
 jobs:
-  # This workflow contains a single job called "greet"
+  # This job builds, tests, lints and packages the artifact for the image job
   build:
-    # The type of runner that the job will run on
+    name: Build frontend
     runs-on: ubuntu-latest
     environment: production
     defaults:
       run:
         working-directory: frontend
 
-    # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-    # Runs a single command using the runners shell
-    - uses: actions/checkout@v2
-    - uses: actions/setup-node@v2
+    - name: Checkout git repo
+      uses: actions/checkout@v2
+
+    - name: Setup node
+      uses: actions/setup-node@v2
       with:
         node-version: '16.13.2'
         cache: 'npm'
         cache-dependency-path: frontend/package-lock.json
-    - run: npm ci
-    - run: npm run build
+
+    - name: Installing dependecies
+      run: npm ci
+
+    - name: Building production bundle
+      run: npm run build
       env:
         REACT_APP_API_ENDPOINT_URL: ${{secrets.REACT_APP_API_ENDPOINT_URL}}
-    - name: Running test
+
+    - name: Running tests
       run: npm test
+
     - name: Running lint
       run: npm run lint
-    - uses: actions/upload-artifact@v2
+
+    - name: Uploading build artifact
+      uses: actions/upload-artifact@v2
       with:
         name: build
         path: frontend/build
+
+  # This job build docker image and publishes it in DockerHub
   image:
+    name: Build & Publish image in DockerHub
     runs-on: ubuntu-latest
     needs: build
     environment: production
+    
     steps:
-    - uses: actions/checkout@v2
-    - uses: actions/download-artifact@v2
+    - name: Checkout git repo
+      uses: actions/checkout@v2
+
+    - name: Uploading build artifact
+      uses: actions/download-artifact@v2
       with:
         name: build
         path: infrastructure/frontend/build
+
     - name: Login to DockerHub
       uses: docker/login-action@v1 
       with:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }}
+
     - name: Get latest commit sha
       id: get-sha
       run: echo "::set-output name=short-sha::$(git rev-parse --short HEAD)"
+
     - name: Build and publish docker image
       uses: docker/build-push-action@v2
       with:
         context: infrastructure/frontend
         push: true
         tags: chavdarb/devops-sample-frontend:${{steps.get-sha.outputs.short-sha}},chavdarb/devops-sample-frontend:latest
-    - uses: azure/container-scan@v0
+
+    - name: Scan image for vulnerabilities
+      uses: azure/container-scan@v0
       with:
         image-name: chavdarb/devops-sample-frontend:${{steps.get-sha.outputs.short-sha}}
+
+  # This job deploys frontend to K8s
   deploy:
+    name: Deploy frontend
     runs-on: ubuntu-latest
     needs: image
     environment: production
+
     steps:
-    - uses: actions/checkout@v2
-    - uses: azure/setup-kubectl@v2.0
+    - name: Checkout git repo
+      uses: actions/checkout@v2
+
+    - name: Setup kubectl
+      uses: azure/setup-kubectl@v2.0
       with:
         version: v1.23.2
-    - uses: azure/k8s-set-context@v1
+
+    - name: Connect to K8s cluster
+      uses: azure/k8s-set-context@v1
       with:
         method: kubeconfig
         kubeconfig: ${{ secrets.KUBE_CONFIG }}
-    - id: get-sha
+
+    - name: Get latest commit sha
+      id: get-sha
       run: echo "::set-output name=short-sha::$(git rev-parse --short HEAD)"
-    - uses: Azure/k8s-deploy@v1.4
+
+    - name: Deploy frontend to K8s cluster
+      uses: Azure/k8s-deploy@v1.4
       with:
         manifests: infrastructure/frontend.yaml
         images: 'chavdarb/devops-sample-frontend:${{steps.get-sha.outputs.short-sha}}'
