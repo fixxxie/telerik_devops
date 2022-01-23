@@ -22,7 +22,7 @@ jobs:
         working-directory: backend
     services:
       mysql:
-        image: mysql:8.0.28
+        image: mysql:8.0.27
         env:
           MYSQL_ALLOW_EMPTY_PASSWORD: yes
           MYSQL_DATABASE: dev_ops_proof_of_concept_test
@@ -48,6 +48,7 @@ jobs:
         restore-keys: ${{ runner.os }}-composer-
     - name: Install dependencies
       run: composer install --prefer-dist
+    - run: ping -c 2 mysql
     - run: mysql -utest-user -ptest-password -hmysql -e "SHOW DATABASES"
     - name: Running backend tests
       env: 
