@@ -98,4 +98,4 @@ jobs:
       with:
         context: infrastructure/backend
         push: true
-        tags: chavdarb/devops-sample-backend:${{steps.get-sha.outputs.short-sha}}
+        tags: chavdarb/devops-sample-backend:${{steps.get-sha.outputs.short-sha}},chavdarb/devops-sample-backend:latest

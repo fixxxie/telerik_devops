@@ -65,4 +65,4 @@ jobs:
       with:
         context: infrastructure/frontend
         push: true
-        tags: chavdarb/devops-sample-frontend:${{steps.get-sha.outputs.short-sha}}
+        tags: chavdarb/devops-sample-frontend:${{steps.get-sha.outputs.short-sha}},chavdarb/devops-sample-frontend:latest
