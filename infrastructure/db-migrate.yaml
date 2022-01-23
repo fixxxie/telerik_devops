@@ -1,0 +1,38 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: db-migrate
+spec:
+  template:
+    spec:
+      containers:
+      - name: db-migrate
+        image: chavdarb/devops-sample-backend:latest
+        env:
+        - name: DB_CONNECTION
+          value: mysql
+        - name: DB_HOST
+          value: mysql-service
+        - name: DB_PORT
+          value: "3306"
+        - name: DB_DATABASE
+          value: devops-db
+        - name: DB_USERNAME
+          value: devops-user
+        - name: DB_PASSWORD
+          value: devops-password
+        - name: APP_ENV
+          value: production
+        - name: APP_KEY
+          value: wahvuu1posh4ovierohnguich8Soofee
+        - name: APP_URL
+          value: http://api.chavdarbonev.com
+        - name: FRONTEND_URL
+          value: www.chavdarbonev.com
+        - name: SESSION_DRIVER
+          value: cookie
+        - name: SESSION_DOMAIN
+          value: .chavdarbonev.com
+        command: ["php", "artisan", "db:setup"]
+      restartPolicy: Never
+  backoffLimit: 4
