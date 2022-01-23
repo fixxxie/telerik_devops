@@ -66,3 +66,21 @@ jobs:
         context: infrastructure/frontend
         push: true
         tags: chavdarb/devops-sample-frontend:${{steps.get-sha.outputs.short-sha}},chavdarb/devops-sample-frontend:latest
+  deploy:
+    runs-on: ubuntu-latest
+    needs: image
+    environment: production
+    steps:
+    - uses: actions/checkout@v2
+    - uses: azure/setup-kubectl@v2.0
+      with:
+        version: v1.23.2
+    - uses: azure/k8s-set-context@v1
+      with:
+        method: kubeconfig
+        kubeconfig: ${{ secrets.KUBE_CONFIG }}
+    - run: echo "::set-output name=short-sha::$(git rev-parse --short HEAD)"
+    - uses: Azure/k8s-deploy@v1.4
+      with:
+        manifests: infrastructure/frontend.yaml
+        images: 'chavdarb/devops-sample-frontend:${{steps.get-sha.outputs.short-sha}}'
