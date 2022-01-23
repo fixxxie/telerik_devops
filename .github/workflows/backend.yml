@@ -118,3 +118,5 @@ jobs:
       with:
         manifests: infrastructure/backend.yaml
         images: 'chavdarb/devops-sample-backend:${{steps.get-sha.outputs.short-sha}}'
+    - run: kubectl delete job db-migrate
+    - run: kubectl apply -f infrastructure/db-migrate.yaml
