@@ -1,6 +1,6 @@
 # This workflow manages the K8s infrastructure
 
-name: Deploy infrastructure
+name: Deploy Infrastructure
 
 # Workflow is triggered on infrastructure commit/push
 on:

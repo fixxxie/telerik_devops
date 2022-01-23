@@ -1,5 +1,5 @@
 # This workflow builds, tests, lints and deploys the frontend
-name: Build & deploy Frontend
+name: Build & Deploy Frontend
 
 # Workflow is triggered on frontend commit/push
 on:
