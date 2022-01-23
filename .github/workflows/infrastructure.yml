@@ -25,4 +25,11 @@ jobs:
       with:
         method: kubeconfig
         kubeconfig: ${{ secrets.KUBE_CONFIG }}
-    - run: kubectl get all
+    - uses: Azure/k8s-deploy@v1.4
+      with:
+        manifests: |
+            infrastructure/mysql.yaml
+            infrastructure/backend.yaml
+            infrastructure/frontend.yaml
+            infrastructure/db-migrate.yaml
+            infrastructure/nginx-backend.yaml
