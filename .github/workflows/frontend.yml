@@ -36,6 +36,7 @@ jobs:
         REACT_APP_API_ENDPOINT_URL: ${{secrets.REACT_APP_API_ENDPOINT_URL}}
     - name: Running test
       run: npm test
+    - name: Rinning lint
       run: npm lint
     - uses: actions/upload-artifact@v2
       with:
