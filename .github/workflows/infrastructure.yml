@@ -31,5 +31,4 @@ jobs:
             infrastructure/mysql.yaml
             infrastructure/backend.yaml
             infrastructure/frontend.yaml
-            infrastructure/db-migrate.yaml
             infrastructure/nginx-backend.yaml
