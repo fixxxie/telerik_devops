@@ -23,6 +23,10 @@ jobs:
     - name: Checkout git repo
       uses: actions/checkout@v2
 
+    - name: Get latest commit sha
+      id: get-sha
+      run: echo "::set-output name=short-sha::$(git rev-parse --short HEAD)"
+
     - name: Setup node
       uses: actions/setup-node@v2
       with:
@@ -37,6 +41,7 @@ jobs:
       run: npm run build
       env:
         REACT_APP_API_ENDPOINT_URL: ${{secrets.REACT_APP_API_ENDPOINT_URL}}
+        REACT_APP_APP_VERSION: ${{steps.get-sha.outputs.short-sha}}
 
     - name: Running tests
       run: npm test
@@ -105,7 +110,7 @@ jobs:
       with:
         version: v1.23.2
 
-    - name: Connect to K8s cluster
+    - name: Configure connection to K8s cluster
       uses: azure/k8s-set-context@v1
       with:
         method: kubeconfig
