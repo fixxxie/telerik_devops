@@ -1,25 +1,24 @@
-# This is a basic workflow that is manually triggered
+# This workflow builds, tests, lints and deploys the backend
+name: Build & Deploy Backend
 
-name: Build & deploy backend
-
-# Controls when the action will run. Workflow runs when manually triggered using the UI
-# or API.
+# Workflow is triggered on backend commit/push
 on:
   push:
     branches: [ main ]
     paths:
       - 'backend/**'
       - '**/workflows/backend.yml'
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+
 jobs:
-  # This workflow contains a single job called "greet"
+  # This job builds, tests, lints and packeges the artifact for the image job
   build:
-    # The type of runner that the job will run on
+    name: Build backend
     runs-on: ubuntu-latest
     environment: production
     defaults:
       run:
         working-directory: backend
+
     services:
       mysql:
         image: mysql:8.0.27
@@ -31,6 +30,7 @@ jobs:
         ports:
           - 3306:3306
         options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+
     env: 
         DB_CONNECTION: mysql
         DB_HOST: 127.0.0.1
@@ -38,14 +38,19 @@ jobs:
         DB_USERNAME: test-user
         DB_PASSWORD: test-password
         APP_ENV: testing
+
     steps:
-    - uses: actions/checkout@v2
-    - uses: shivammathur/setup-php@v2
+    - name: Checkout git repo
+      uses: actions/checkout@v2
+
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
       with:
         php-version: '8.0.14'
         tools: composer
         extensions: mbstring, dom, fileinfo, mysql
         coverage: xdebug
+
     - name: Get composer cache directory
       id: composer-cache
       run: echo "::set-output name=dir::$(composer config cache-files-dir)"
@@ -55,71 +60,106 @@ jobs:
         path: ${{ steps.composer-cache.outputs.dir }}
         key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
         restore-keys: ${{ runner.os }}-composer-
-    - name: Install dependencies
+
+    - name: Installing PHP dependencies
       run: composer install --prefer-dist
+
     - name: Running lint
       run: php artisan lint
+
     - name: Running static code analyse
       run: php artisan analyse:code
+
     - name: Running backend tests
       run: php artisan test
+
     - name: Archiving build
       run: zip -r -q build.zip ./*
-    - uses: actions/upload-artifact@v2
+    - name: Uploading build artifact
+      uses: actions/upload-artifact@v2
       with:
         name: build
         path: backend/build.zip
+
+  # This job build docker image and publishes it in DockerHub
   image:
+    name: Build & Publish image in DockerHub
     runs-on: ubuntu-latest
     needs: build
     environment: production
+
     steps:
-    - uses: actions/checkout@v2
-    - uses: actions/download-artifact@v2
+    - name: Checkout git repo
+      uses: actions/checkout@v2
+
+    - name: Download artifact
+      uses: actions/download-artifact@v2
       with:
         name: build
         path: infrastructure/backend/build
+
     - name: Unzip artifact
       working-directory: infrastructure/backend/build
       run: unzip build.zip
     - name: Delete zip
       working-directory: infrastructure/backend/build
       run: unlink build.zip
+
     - name: Login to DockerHub
       uses: docker/login-action@v1 
       with:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }}
+
     - name: Get latest commit sha
       id: get-sha
       run: echo "::set-output name=short-sha::$(git rev-parse --short HEAD)"
-    - name: Build and publish docker image
+
+    - name: Push docker image
       uses: docker/build-push-action@v2
       with:
         context: infrastructure/backend
         push: true
         tags: chavdarb/devops-sample-backend:${{steps.get-sha.outputs.short-sha}},chavdarb/devops-sample-backend:latest
-    - uses: azure/container-scan@v0
+
+    - name: Scan image for vulnerabilities
+      uses: azure/container-scan@v0
       with:
         image-name: chavdarb/devops-sample-backend:${{steps.get-sha.outputs.short-sha}}
+
+  # Deploy backend to K8s
   deploy:
+    name: Deploy backend
     runs-on: ubuntu-latest
     needs: image
     environment: production
+
     steps:
-    - uses: actions/checkout@v2
-    - uses: azure/setup-kubectl@v2.0
+    - name: Checkout git repo
+      uses: actions/checkout@v2
+
+    - name: Setup kubectl
+      uses: azure/setup-kubectl@v2.0
       with:
         version: v1.23.2
-    - uses: azure/k8s-set-context@v1
+
+    - name: Connect to K8s cluster
+      uses: azure/k8s-set-context@v1
       with:
         method: kubeconfig
         kubeconfig: ${{ secrets.KUBE_CONFIG }}
-    - id: get-sha
+
+    - name: Get latest commit sha
+      id: get-sha
       run: echo "::set-output name=short-sha::$(git rev-parse --short HEAD)"
-    - uses: Azure/k8s-deploy@v1.4
+
+    - name: Deploy backend to K8s cluster
+      uses: Azure/k8s-deploy@v1.4
       with:
         manifests: infrastructure/backend.yaml
         images: 'chavdarb/devops-sample-backend:${{steps.get-sha.outputs.short-sha}}'
-    - run: kubectl delete job db-migrate
-    - run: kubectl apply -f infrastructure/db-migrate.yaml
+
+    - name: Delete migration job
+      run: kubectl delete job db-migrate
+    - name: Applying DB migrations
+      run: kubectl apply -f infrastructure/db-migrate.yaml
