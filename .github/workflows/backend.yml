@@ -48,7 +48,7 @@ jobs:
         restore-keys: ${{ runner.os }}-composer-
     - name: Install dependencies
       run: composer install --prefer-dist
-    - run: mysql -utest-user -ptest-password -e "SHOW DATABASES"
+    - run: mysql -utest-user -ptest-password -h mysql -e "SHOW DATABASES"
     - name: Running backend tests
       env: 
         DB_CONNECTION: mysql
