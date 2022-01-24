@@ -9,7 +9,7 @@ Tools used for CI/CD:
 - Kubernetes
 - Github Actions
 
-![Application Architecture](app-architecture.svg "Application Architecture")
+![Application Architecture](app-architecture.png "Application Architecture")
 
 ![Infrastructure](infrastructure.svg "Infrastructure")
 
