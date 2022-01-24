@@ -11,6 +11,6 @@ Tools used for CI/CD:
 
 ![Application Architecture](app-architecture.svg "Application Architecture")
 
-![Infrastructure](infra.svg "Infrastructure")
+![Infrastructure](infrastructure.svg "Infrastructure")
 
 ![Pipeline](pipeline.svg "Pipeline")
