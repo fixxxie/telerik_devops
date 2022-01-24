@@ -116,7 +116,7 @@ jobs:
       id: get-sha
       run: echo "::set-output name=short-sha::$(git rev-parse --short HEAD)"
 
-    - name: Push docker image
+    - name: Build & Push docker image
       uses: docker/build-push-action@v2
       with:
         context: infrastructure/backend
